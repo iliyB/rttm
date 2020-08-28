@@ -15,13 +15,14 @@
 #define RED 'r'
 
 struct node {
-    char key[48];
+    u_char key[48];
     struct timespec spec;
-    char color;
+    u_char color;
+    uint8_t use;
     struct node *left, *right, *parent;
 };
 
-
+uint8_t g = 0;
 
 void insert_repair_tree(struct node *n);
 
@@ -219,7 +220,6 @@ void replace_node(struct node *n, struct node *child) {
         else
             n->parent->right = child;
     }
-    else {
         /*
         if (child == n->left) {
             root = child;
@@ -243,7 +243,6 @@ void replace_node(struct node *n, struct node *child) {
             child->parent = NULL;
         }
         */
-    }
 }
 
 int is_leaf(struct node *n) {
@@ -256,16 +255,21 @@ void delete_one_child(struct node *n) {
     /*
      * Precondition: n has at most one non-leaf child.
      */
-    struct node *child = is_leaf(n->right) ? n->left : n->right;
+    if (g < 3) 
+    {
+        struct node *child = is_leaf(n->right) ? n->left : n->right;
 
-    replace_node(n, child);
-    if (n->color == BLACK) {
-        if (child->color == RED)
-            child->color = BLACK;
-        else
-            delete_case1(child);
+        replace_node(n, child);
+        if (n->color == BLACK) {
+            if (child->color == RED)
+                child->color = BLACK;
+            else
+                delete_case1(child);
+        }
+        printk("deleted!");
+        kfree(n);
+        g++;
     }
-    kfree(n);
 }
 
 void delete_case1(struct node *n) {
@@ -357,17 +361,17 @@ struct node *search(struct node *temp, char key[48]) {
     int diff;
     if (temp == NULL) return 0;
     while (!is_leaf(temp)) {
-        printk("key - %s", temp->key);
+        diff = strcmp(key, temp->key);
         if (diff > 0) {
             temp = temp->right;
         } else if (diff < 0) {
             temp = temp->left;
         } else {
-            //printf("Search Element Found - %s!!\n", temp->key);
+            //printk("Search Element Found - %s!!\n", temp->key);
             return temp;
         }
     }
-    //printf("Given Data Not Found in the tree!!\n");
+    //printk("Given Data Not Found in the tree!!\n");
     return 0;
 }
 
