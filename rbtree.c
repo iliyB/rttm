@@ -18,10 +18,10 @@ struct node {
     u_char key[48];
     struct timespec spec;
     u_char color;
+    uint8_t use;
     struct node *left, *right, *parent;
 };
 
-uint8_t g = 0;
 
 void insert_repair_tree(struct node *n);
 
